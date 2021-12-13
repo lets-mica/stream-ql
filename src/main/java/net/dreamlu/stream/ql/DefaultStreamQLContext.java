@@ -45,7 +45,8 @@ public class DefaultStreamQLContext implements StreamQLContext {
     @Override
     public Stream<Object> getDataSource(String name) {
         name = getCleanStr(name);
-        return mapper.apply(name, supplier.apply(name));
+        Stream<Object> stream = supplier.apply(name);
+        return mapper.apply(name, stream);
     }
 
     @Override
@@ -68,7 +69,16 @@ public class DefaultStreamQLContext implements StreamQLContext {
         return context;
     }
 
-    private static String getCleanStr(String text) {
-        return text;
+    private static String getCleanStr(String str) {
+        if (str == null) {
+            return null;
+        }
+        if (str.startsWith("\"") || str.startsWith("'")) {
+            str = str.substring(1);
+        }
+        if (str.endsWith("\"") || str.endsWith("'")) {
+            str = str.substring(0, str.length() - 1);
+        }
+        return str;
     }
 }

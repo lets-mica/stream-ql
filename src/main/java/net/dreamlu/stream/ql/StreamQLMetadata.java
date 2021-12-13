@@ -1,7 +1,6 @@
 package net.dreamlu.stream.ql;
 
 import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
-import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlSchemaStatVisitor;
 import net.dreamlu.stream.ql.feature.Feature;
 import net.dreamlu.stream.ql.feature.FeatureId;
 
@@ -47,14 +46,7 @@ public interface StreamQLMetadata {
      *
      * @return SQL
      */
-    SQLSelectQueryBlock getQuery();
-
-    /**
-     * 获取 sql 解析起
-     *
-     * @return sqlVisitor
-     */
-    MySqlSchemaStatVisitor getSqlVisitor();
+    SQLSelectQueryBlock getSelect();
 
     /**
      * 获取特性,如果不存在则抛出异常
@@ -79,6 +71,5 @@ public interface StreamQLMetadata {
         return getFeature(featureId)
                 .orElseThrow(() -> new UnsupportedOperationException("unsupported feature: " + errorMessage.get()));
     }
-
 
 }

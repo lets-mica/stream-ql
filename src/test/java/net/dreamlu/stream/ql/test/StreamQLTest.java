@@ -9,7 +9,7 @@ import java.util.List;
 public class StreamQLTest {
 
     public static void main(String[] args) {
-        StreamQL.sql("select * from '/test/1'")
+        StreamQL.sql("select * from '/test/1', '/test/2', '/test/3'")
                 .build()
                 .execute((table) ->
                         getMessage().stream()

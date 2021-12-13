@@ -4,26 +4,25 @@ import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
-import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlSchemaStatVisitor;
 import net.dreamlu.stream.ql.feature.Feature;
 import net.dreamlu.stream.ql.feature.FeatureId;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DefaultStreamQLMetadata implements StreamQLMetadata {
     private static final Map<String, Feature> globalFeatures = new ConcurrentHashMap<>();
 
-    private final SQLSelectQueryBlock query;
-    private final MySqlSchemaStatVisitor visitor;
-
+    private final SQLSelectQueryBlock select;
     private final Map<String, Feature> features = new ConcurrentHashMap<>(globalFeatures);
     private final Map<String, Object> settings = new ConcurrentHashMap<>();
 
     DefaultStreamQLMetadata(String sql) {
         SQLSelectStatement selectStatement = getSQLSelectStatement(sql);
-        this.query = selectStatement.getSelect().getQueryBlock();
-        this.visitor = getSqlVisitor(selectStatement);
+        this.select = selectStatement.getSelect().getQueryBlock();
     }
 
     private static SQLSelectStatement getSQLSelectStatement(String sql) {
@@ -32,12 +31,6 @@ public class DefaultStreamQLMetadata implements StreamQLMetadata {
             return (SQLSelectStatement) statement;
         }
         throw new IllegalArgumentException(String.format("Sql [%s] is not select sql!", sql));
-    }
-
-    private static MySqlSchemaStatVisitor getSqlVisitor(SQLSelectStatement selectStatement) {
-        MySqlSchemaStatVisitor visitor = new MySqlSchemaStatVisitor();
-        selectStatement.accept(visitor);
-        return visitor;
     }
 
     public void addFeature(Feature... features) {
@@ -67,13 +60,8 @@ public class DefaultStreamQLMetadata implements StreamQLMetadata {
     }
 
     @Override
-    public SQLSelectQueryBlock getQuery() {
-        return this.query;
-    }
-
-    @Override
-    public MySqlSchemaStatVisitor getSqlVisitor() {
-        return this.visitor;
+    public SQLSelectQueryBlock getSelect() {
+        return this.select;
     }
 
 }

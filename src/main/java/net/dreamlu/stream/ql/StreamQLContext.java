@@ -20,7 +20,7 @@ public interface StreamQLContext {
      * @param supplier 数据源
      * @return this
      */
-    static StreamQLContext ofDatasource(Function<String, Stream<?>> supplier) {
+    static StreamQLContext ofDatasource(Function<String, Stream<Object>> supplier) {
         return new DefaultStreamQLContext(supplier);
     }
 

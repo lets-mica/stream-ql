@@ -5,7 +5,7 @@ import com.alibaba.druid.sql.ast.SQLLimit;
 import com.alibaba.druid.sql.ast.expr.SQLIntegerExpr;
 import net.dreamlu.stream.ql.feature.FromFeature;
 
-import java.util.*;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -42,7 +42,7 @@ class DefaultStreamQL implements StreamQL {
 //        join = createJoin();
 //        orderBy = createOrderBy();
 //        distinct = createDistinct();
-        Function<StreamQLContext, Stream<StreamQLRecord>> fromMapper = FromFeature.createFromMapperByBody(metadata.getSqlVisitor(), metadata);
+        Function<StreamQLContext, Stream<StreamQLRecord>> fromMapper = FromFeature.createFromMapperByBody(metadata.getSelect().getFrom(), metadata);
         builder = ctx ->
                 limit.apply(
                         offset.apply(
@@ -59,7 +59,7 @@ class DefaultStreamQL implements StreamQL {
     }
 
     private Function<Stream<StreamQLRecord>, Stream<StreamQLRecord>> createLimit() {
-        SQLLimit limit = metadata.getQuery().getLimit();
+        SQLLimit limit = metadata.getSelect().getLimit();
         if (limit != null) {
             SQLExpr expr = limit.getRowCount();
             if (expr instanceof SQLIntegerExpr) {
@@ -70,7 +70,7 @@ class DefaultStreamQL implements StreamQL {
     }
 
     private Function<Stream<StreamQLRecord>, Stream<StreamQLRecord>> createOffset() {
-        SQLLimit limit = metadata.getQuery().getLimit();
+        SQLLimit limit = metadata.getSelect().getLimit();
         if (limit != null) {
             SQLExpr expr = limit.getOffset();
             if (expr instanceof SQLIntegerExpr) {
