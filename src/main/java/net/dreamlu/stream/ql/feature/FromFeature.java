@@ -38,7 +38,7 @@ public interface FromFeature extends Feature {
             );
         }
         // TODO L.cm 解析更多类型的 sql
-        throw new IllegalArgumentException("不支持的 sql 语法");
+        throw new UnsupportedOperationException("不支持的 sql 语法");
     }
 
     static Function<StreamQLContext, Stream<StreamQLRecord>> createFromMapperByBody(SQLTableSource tableSource, StreamQLMetadata metadata) {
@@ -68,7 +68,7 @@ public interface FromFeature extends Feature {
     static String getTableName(SQLExpr expr) {
         if (expr instanceof SQLIdentifierExpr) {
             return ((SQLIdentifierExpr) expr).getName();
-        } if (expr instanceof SQLCharExpr) {
+        } else if (expr instanceof SQLCharExpr) {
             return ((SQLCharExpr) expr).getText();
         }
         return null;

@@ -3,9 +3,11 @@ package net.dreamlu.stream.ql;
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLLimit;
 import com.alibaba.druid.sql.ast.expr.SQLIntegerExpr;
+import net.dreamlu.stream.ql.feature.FilterFeature;
 import net.dreamlu.stream.ql.feature.FromFeature;
 
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -13,9 +15,9 @@ class DefaultStreamQL implements StreamQL {
     private final StreamQLMetadata metadata;
 
     private Function<Stream<StreamQLRecord>, Stream<StreamQLRecord>> columnMapper;
-//    private Function<Stream<StreamQLRecord>, Stream<StreamQLRecord>> join;
-//    private Function<Stream<StreamQLRecord>, Stream<StreamQLRecord>> where;
-//    private Function<Stream<StreamQLRecord>, Stream<StreamQLRecord>> groupBy;
+    //    private Function<Stream<StreamQLRecord>, Stream<StreamQLRecord>> join;
+    private Function<Stream<StreamQLRecord>, Stream<StreamQLRecord>> where;
+    //    private Function<Stream<StreamQLRecord>, Stream<StreamQLRecord>> groupBy;
 //    private Function<Stream<StreamQLRecord>, Stream<StreamQLRecord>> orderBy;
     private Function<Stream<StreamQLRecord>, Stream<StreamQLRecord>> limit;
     private Function<Stream<StreamQLRecord>, Stream<StreamQLRecord>> offset;
@@ -34,7 +36,7 @@ class DefaultStreamQL implements StreamQL {
     }
 
     protected void prepare() {
-//        where = createWhere();
+        where = createWhere();
         columnMapper = createMapper();
         limit = createLimit();
         offset = createOffset();
@@ -47,12 +49,20 @@ class DefaultStreamQL implements StreamQL {
                 limit.apply(
                         offset.apply(
                                 columnMapper.apply(
-                                    fromMapper.apply(ctx)
+                                        fromMapper.apply(ctx)
                                 )
                         )
                 );
     }
 
+    private Function<Stream<StreamQLRecord>, Stream<StreamQLRecord>> createWhere() {
+        SQLExpr whereExpr = metadata.getSelect().getWhere();
+        if (whereExpr == null) {
+            return Function.identity();
+        }
+        BiFunction<StreamQLRecord, Object, Boolean> filter = FilterFeature.createPredicateNow(whereExpr, metadata);
+        return flux -> flux.filter(ctx -> filter.apply(ctx, ctx.getRecord()));
+    }
 
     private Function<Stream<StreamQLRecord>, Stream<StreamQLRecord>> createMapper() {
         return stream -> stream.map(StreamQLRecord::putRecordToResult);
